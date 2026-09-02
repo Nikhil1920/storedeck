@@ -1550,7 +1550,7 @@
         </div>
     </div>
 
-    <!-- Magical Titles Confirmation Modal -->
+    <!-- Magical Titles Confirmation Modal (WebMCP) -->
     <div class="modal-overlay" id="magical-titles-modal">
         <div class="modal">
             <div class="modal-icon" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 140, 0, 0.2) 100%);">
@@ -1559,8 +1559,14 @@
                 </svg>
             </div>
             <h3 class="modal-title">Generate Magical Titles</h3>
-            <p class="modal-message">This will use AI to analyze your screenshots and generate marketing headlines and subheadlines for each screen.</p>
-            <p class="modal-message" style="margin-top: 8px; font-size: 12px; color: var(--text-tertiary);">Screenshots: <span id="magical-titles-count">0</span> · Provider: <span id="magical-titles-provider">-</span></p>
+            <p class="modal-message">This will use your AI assistant via WebMCP site tools to analyze your screenshots and generate marketing headlines and subheadlines. No API keys needed.</p>
+            <p class="modal-message" style="margin-top: 8px; font-size: 12px; color: var(--text-tertiary);">Screenshots: <span id="magical-titles-count">0</span> · Language: <span id="magical-titles-provider">-</span></p>
+            <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 12px; color: var(--text-secondary); line-height: 1.4; text-align: left;">
+                <span style="font-weight: 600;">✨ How it works via Site Tools</span><br>
+                1. Select language below and click <strong>Generate via Site Tools</strong><br>
+                2. If your browser supports WebMCP (e.g., ChatGPT desktop app), your AI assistant will be prompted to analyze screenshots (<code>get_screenshot_images</code>) and apply titles (<code>generate_magical_titles</code>).<br>
+                3. Otherwise, you'll see instructions to ask your assistant manually.
+            </div>
             <div class="translate-source" style="margin-top: 16px;">
                 <label class="control-label">Generate titles in</label>
                 <select id="magical-titles-language" style="margin-bottom: 0;">
@@ -1569,7 +1575,7 @@
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-cancel" id="magical-titles-cancel">Cancel</button>
-                <button class="modal-btn modal-btn-confirm" id="magical-titles-confirm" style="background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);">Generate Titles</button>
+                <button class="modal-btn modal-btn-confirm" id="magical-titles-confirm" style="background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);">Generate via Site Tools</button>
             </div>
         </div>
     </div>
@@ -1854,7 +1860,6 @@
     </div>
 
     <script src="language-utils.js"></script>
-    <script src="magical-titles.js"></script>
     <script src="lucide-icons.js"></script>
     <script src="three-renderer.js"></script>
     <script src="app.js"></script>

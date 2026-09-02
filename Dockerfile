@@ -15,7 +15,6 @@ COPY app.js /usr/share/nginx/html/
 COPY styles.css /usr/share/nginx/html/
 COPY three-renderer.js /usr/share/nginx/html/
 COPY language-utils.js /usr/share/nginx/html/
-COPY magical-titles.js /usr/share/nginx/html/
 COPY webmcp.js /usr/share/nginx/html/
 
 # Copy assets

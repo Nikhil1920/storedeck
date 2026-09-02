@@ -390,6 +390,155 @@
           if (typeof saveState === 'function') await saveState();
           return { success: true, elementId, language };
         }
+      },
+      {
+        name: 'get_screenshot_images',
+        description: 'Get screenshot image data for copywriting. Returns data URLs (base64) for each screenshot in the specified language so the AI can analyze the app UI and generate headlines/subheadlines. Use this for magical titles generation.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            language: { type: 'string', description: "Language code to fetch images for, e.g. 'en'. Defaults to current project language." },
+            maxImages: { type: 'integer', minimum: 1, maximum: 10, description: 'Maximum number of screenshots to return (default 10).' }
+          },
+          additionalProperties: false
+        },
+        annotations: { readOnlyHint: true },
+        execute: async ({ language, maxImages } = {}) => {
+          const lang = language || state.currentLanguage || state.projectLanguages[0] || 'en';
+          const limit = Math.min(maxImages || 10, state.screenshots.length);
+          const results = [];
+          for (let i = 0; i < limit; i++) {
+            const s = state.screenshots[i];
+            if (!s) continue;
+            // Try requested language, fallback to any available
+            let src = s.localizedImages?.[lang]?.src || null;
+            if (!src) {
+              for (const l of state.projectLanguages) {
+                if (s.localizedImages?.[l]?.src) { src = s.localizedImages[l].src; break; }
+              }
+            }
+            if (!src) src = s.image?.src || null;
+            if (!src) continue;
+            // Truncate if very large (limit ~500KB per image to avoid huge tool responses)
+            // Data URLs for screenshots can be large; we return as-is but warn if too big
+            const sizeKB = Math.round(src.length / 1024);
+            results.push({
+              index: i,
+              name: s.name || `Screenshot ${i+1}`,
+              language: lang,
+              dataUrlPreview: src.substring(0, 100) + '...',
+              dataUrlLength: src.length,
+              sizeKB,
+              // Return full data URL only if reasonably sized; agent can request single image if needed
+              dataUrl: sizeKB < 800 ? src : null,
+              truncated: sizeKB >= 800
+            });
+          }
+          return {
+            language: lang,
+            count: results.length,
+            totalScreenshots: state.screenshots.length,
+            images: results,
+            hint: results.some(r=>r.truncated) ? 'Some images truncated due to size. Call get_single_screenshot_image with screenshotIndex for full data.' : undefined
+          };
+        }
+      },
+      {
+        name: 'get_single_screenshot_image',
+        description: 'Get full image data URL for a single screenshot. Use when get_screenshot_images truncated an image or you need one screenshot at full resolution.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            screenshotIndex: { type: 'integer', minimum: 0, description: '0-based screenshot index' },
+            language: { type: 'string', description: "Language code, e.g. 'en'. Defaults to current language." }
+          },
+          required: ['screenshotIndex'],
+          additionalProperties: false
+        },
+        annotations: { readOnlyHint: true },
+        execute: async ({ screenshotIndex, language }) => {
+          const s = state.screenshots[screenshotIndex];
+          if (!s) throw new Error(`Screenshot index ${screenshotIndex} out of range`);
+          const lang = language || state.currentLanguage || state.projectLanguages[0] || 'en';
+          let src = s.localizedImages?.[lang]?.src || null;
+          if (!src) {
+            for (const l of state.projectLanguages) {
+              if (s.localizedImages?.[l]?.src) { src = s.localizedImages[l].src; break; }
+            }
+          }
+          if (!src) src = s.image?.src || null;
+          if (!src) throw new Error(`No image found for screenshot ${screenshotIndex} in language ${lang}`);
+          return {
+            index: screenshotIndex,
+            name: s.name || `Screenshot ${screenshotIndex+1}`,
+            language: lang,
+            dataUrl: src,
+            sizeKB: Math.round(src.length/1024)
+          };
+        }
+      },
+      {
+        name: 'generate_magical_titles',
+        description: 'Generate marketing headlines and subheadlines for all screenshots. You are an expert App Store copywriter. After analyzing screenshot images via get_screenshot_images, call set_bulk_translations with your generated titles. This tool is a helper that validates and applies magical titles with App Store best practices (headline 2-4 words, subheadline 4-8 words, unique per screenshot, first headline is main value prop). Provide language and titles array.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            language: { type: 'string', description: "Language code to generate titles in, e.g. 'en', 'de'" },
+            titles: {
+              type: 'array',
+              description: 'Array of titles, one per screenshot in order. Each entry has headline (2-4 words) and subheadline (4-8 words).',
+              minItems: 1,
+              items: {
+                type: 'object',
+                properties: {
+                  headline: { type: 'string', description: 'Very short headline, 2-4 words, punchy, benefit-focused' },
+                  subheadline: { type: 'string', description: 'Short subheadline, 4-8 words, expands on headline' }
+                },
+                required: ['headline', 'subheadline'],
+                additionalProperties: false
+              }
+            }
+          },
+          required: ['language', 'titles'],
+          additionalProperties: false
+        },
+        annotations: { readOnlyHint: false },
+        execute: async ({ language, titles }, { signal }) => {
+          if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+          if (!isLanguageCodeValid(language)) throw new Error(`Invalid language code: ${language}`);
+          if (!Array.isArray(titles) || titles.length === 0) throw new Error('titles must be non-empty array');
+          if (titles.length !== state.screenshots.length) {
+            throw new Error(`titles length ${titles.length} must match screenshots count ${state.screenshots.length}`);
+          }
+          if (!state.projectLanguages.includes(language) && typeof addProjectLanguage === 'function') {
+            addProjectLanguage(language);
+          }
+          let applied = 0;
+          for (let i = 0; i < titles.length; i++) {
+            if (signal?.aborted) break;
+            const entry = titles[i];
+            const s = state.screenshots[i];
+            if (!s) continue;
+            const t = ensureScreenshotTextStructure(s);
+            if (entry.headline) {
+              if (entry.headline.length > 100) throw new Error(`Headline too long at index ${i} (max 100)`);
+              t.headlines[language] = entry.headline;
+              if (!t.headlineLanguages.includes(language)) t.headlineLanguages.push(language);
+              t.headlineEnabled = true;
+            }
+            if (entry.subheadline) {
+              if (entry.subheadline.length > 150) throw new Error(`Subheadline too long at index ${i} (max 150)`);
+              t.subheadlines[language] = entry.subheadline;
+              if (!t.subheadlineLanguages.includes(language)) t.subheadlineLanguages.push(language);
+              if (entry.subheadline.trim()) t.subheadlineEnabled = true;
+            }
+            applied++;
+          }
+          if (typeof syncUIWithState === 'function') syncUIWithState();
+          if (typeof updateCanvas === 'function') updateCanvas();
+          if (typeof saveState === 'function') await saveState();
+          return { success: true, language, applied, total: titles.length };
+        }
       }
     ];
   }

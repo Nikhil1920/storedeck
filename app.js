@@ -3904,13 +3904,12 @@ function setupEventListeners() {
         translateAllText();
     });
 
-    // Magical Titles button (in header)
+    // Magical Titles button (in header) — WebMCP version
     document.getElementById('magical-titles-btn').addEventListener('click', () => {
-        dismissMagicalTitlesTooltip();
         showMagicalTitlesDialog();
     });
 
-    // Magical Titles modal events
+    // Magical Titles modal events (WebMCP)
     document.getElementById('magical-titles-cancel').addEventListener('click', hideMagicalTitlesDialog);
     document.getElementById('magical-titles-confirm').addEventListener('click', generateMagicalTitles);
     document.getElementById('magical-titles-modal').addEventListener('click', (e) => {
@@ -5328,6 +5327,51 @@ For manual translation, use the Translate buttons on each headline/subheadline.`
     }
 }
 
+// Magical Titles via WebMCP (no direct LLM calls)
+function showMagicalTitlesDialog() {
+    if (!state.screenshots || state.screenshots.length === 0) {
+        showAppAlert('Please add some screenshots first.', 'info');
+        return;
+    }
+    document.getElementById('magical-titles-count').textContent = state.screenshots.length;
+    const defaultLang = state.projectLanguages[0] || 'en';
+    const langName = languageNames[defaultLang] || defaultLang;
+    const flag = languageFlags[defaultLang] || '🏳️';
+    document.getElementById('magical-titles-provider').textContent = `${flag} ${langName}`;
+    const langSelect = document.getElementById('magical-titles-language');
+    if (langSelect) {
+        langSelect.innerHTML = state.projectLanguages.map(lang => {
+            const name = languageNames[lang] || lang;
+            const flag2 = languageFlags[lang] || '';
+            return `<option value="${lang}">${flag2} ${name}</option>`;
+        }).join('');
+        langSelect.value = defaultLang;
+    }
+    document.getElementById('magical-titles-modal').classList.add('visible');
+}
+function hideMagicalTitlesDialog() {
+    document.getElementById('magical-titles-modal').classList.remove('visible');
+}
+async function generateMagicalTitles() {
+    hideMagicalTitlesDialog();
+    const langSelect = document.getElementById('magical-titles-language');
+    const sourceLang = langSelect ? langSelect.value : state.projectLanguages[0] || 'en';
+    const langName = languageNames[sourceLang] || sourceLang;
+    const flag = languageFlags[sourceLang] || '🏳️';
+    const hasWebMCP = typeof document !== 'undefined' && typeof document.modelContext?.registerTool === 'function';
+    if (hasWebMCP) {
+        await showAppAlert(
+            `✨ WebMCP Site Tools are active.\n\nTo generate magical titles in ${flag} ${langName}:\n• Open this page in ChatGPT desktop app (or any WebMCP-capable browser)\n• Ask: "Generate magical titles for my ${state.screenshots.length} screenshots in ${sourceLang} — analyze the screenshots and create headlines (2-4 words) and subheadlines (4-8 words) for each"\n\nYour AI assistant will:\n1. Call get_screenshot_images to analyze your app UI\n2. Generate unique marketing copy per screenshot (first headline = main value prop)\n3. Call generate_magical_titles or set_bulk_translations to apply them\n\nYou’ll see the canvas update instantly.`,
+            'info'
+        );
+    } else {
+        await showAppAlert(
+            'WebMCP site tools not detected in this browser. For AI-generated titles, open this page in ChatGPT desktop app and ask your AI assistant to generate magical titles. You can also enter headlines manually in the Text tab.',
+            'info'
+        );
+    }
+}
+
 // WebMCP: translation is now handled by the AI agent via site tools (see webmcp.js)
 
 
@@ -5705,8 +5749,6 @@ function createNewScreenshot(img, src, name, lang, deviceType) {
     updateScreenshotList();
     if (state.screenshots.length === 1) {
         state.selectedIndex = 0;
-        // Show Magical Titles tooltip hint for first screenshot
-        setTimeout(() => showMagicalTitlesTooltip(), 500);
     }
 }
 

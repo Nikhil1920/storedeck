@@ -42,7 +42,7 @@ A free, open-source tool for creating beautiful App Store screenshots with custo
 ### Multi-Language Support
 - **Multiple Languages**: Add translations for any language
 - **Language Flags**: Visual language switcher with flag icons
-- **AI-Powered Translation**: Auto-translate using Claude, OpenAI, or Google AI
+- **AI Translation via WebMCP**: Ask your AI assistant (ChatGPT etc.) to translate via site tools — no API keys needed
 - **Per-Screenshot Languages**: Different text per screenshot if needed
 - **Localized Screenshots**: Upload language-specific screenshot images with auto-detection from filename
 - **Smart Duplicate Detection**: Dialog to replace, create new, or skip when uploading matching screenshots
@@ -154,17 +154,19 @@ docker compose -f docker-compose.build.yml up -d
 6. **Add Text**: Enter your headline and optional subheadline
 7. **Export**: Download the current screenshot or export all at once as ZIP
 
-## AI Translation
+## AI Translation (via WebMCP Site Tools)
 
-To use the AI-powered translation feature:
+Translations are now powered by **WebMCP site tools** — no API keys needed.
 
-1. Click the Settings icon (gear) in the sidebar
-2. Choose your AI provider (Claude, OpenAI, or Google)
-3. Enter your API key from the respective provider's console
-4. Add multiple languages to your headline/subheadline
-5. Click the translate icon and use "Auto-translate with AI"
+1. Add multiple languages via the language menu (flag icon)
+2. Enter your headline/subheadline in the source language
+3. Open this page in a **WebMCP-capable browser** (e.g., ChatGPT desktop app) and ask your AI assistant:
+   - _"Translate all screenshots from en to de, fr, ja"_
+   - _"Translate headline on screenshot 2 to German"_
+4. The assistant will call site tools (`list_screenshots`, `set_bulk_translations`, etc.) and apply translations directly — you’ll see the canvas update instantly.
+5. Alternatively, translate manually in the Translate modal for any browser.
 
-Your API key is stored locally in your browser and only sent to the respective AI provider's API.
+Learn more: [WebMCP spec](https://webmachinelearning.github.io/webmcp/) · [ChatGPT Site Tools docs](https://learn.chatgpt.com/docs/webmcp)
 
 ## Tech Stack
 
@@ -174,7 +176,7 @@ Your API key is stored locally in your browser and only sent to the respective A
 - IndexedDB for local storage
 - JSZip for batch export
 - Google Fonts API for font picker
-- Claude/OpenAI/Google APIs for translations
+- WebMCP site tools for AI translations (no external API keys)
 - Docker + nginx for containerized deployment
 
 ## Apps Using This Project
