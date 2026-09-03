@@ -467,7 +467,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async ({ action, name, projectId }, { signal }) => {
+        execute: async ({ action, name, projectId } = {}, { signal } = {}) => {
           checkAborted(signal);
           if (action === 'create') {
             if (!name) throw new Error('action "create" requires name');
@@ -519,7 +519,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async ({ action, screenshotIndex, fromIndex, toIndex, screenshots }, { signal }) => {
+        execute: async ({ action, screenshotIndex, fromIndex, toIndex, screenshots } = {}, { signal } = {}) => {
           checkAborted(signal);
           if (action === 'upload') {
             if (!Array.isArray(screenshots) || screenshots.length === 0) throw new Error('action "upload" requires screenshots array');
@@ -647,7 +647,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async (args, { signal }) => {
+        execute: async (args = {}, { signal } = {}) => {
           checkAborted(signal);
           if (state.screenshots.length === 0) throw new Error('No screenshots yet — upload with manage_screenshots action=upload first');
           const targets = resolveTargets(args.screenshotIndex, args.applyToAll);
@@ -746,7 +746,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async (args, { signal }) => {
+        execute: async (args = {}, { signal } = {}) => {
           checkAborted(signal);
           if (state.screenshots.length === 0) throw new Error('No screenshots yet — upload with manage_screenshots action=upload first');
           const targets = resolveTargets(args.screenshotIndex, args.applyToAll);
@@ -800,7 +800,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async ({ translations }, { signal }) => {
+        execute: async ({ translations } = {}, { signal } = {}) => {
           checkAborted(signal);
           if (!Array.isArray(translations) || translations.length === 0) {
             throw new Error('translations must be a non-empty array');
@@ -894,7 +894,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async (args, { signal }) => {
+        execute: async (args = {}, { signal } = {}) => {
           checkAborted(signal);
           if (state.screenshots.length === 0) throw new Error('No screenshots yet — upload with manage_screenshots action=upload first');
           const targets = resolveTargets(args.screenshotIndex, args.applyToAll);
@@ -934,7 +934,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async ({ action, language }, { signal }) => {
+        execute: async ({ action, language } = {}, { signal } = {}) => {
           checkAborted(signal);
           if (!isLanguageCodeValid(language)) throw new Error(`Invalid language code: ${language}`);
           if (action === 'add') {
@@ -1049,7 +1049,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async (args, { signal }) => {
+        execute: async (args = {}, { signal } = {}) => {
           checkAborted(signal);
           const { action, elementId, screenshotIndex } = args;
           if (action === 'add') {
@@ -1151,7 +1151,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async ({ action, popoutId, screenshotIndex, properties }, { signal }) => {
+        execute: async ({ action, popoutId, screenshotIndex, properties } = {}, { signal } = {}) => {
           checkAborted(signal);
           if (action === 'add') {
             if (typeof addPopout !== 'function') throw new Error('addPopout not available');
@@ -1213,7 +1213,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async ({ outputDevice, customWidth, customHeight }, { signal }) => {
+        execute: async ({ outputDevice, customWidth, customHeight } = {}, { signal } = {}) => {
           checkAborted(signal);
           const known = (typeof deviceDimensions !== 'undefined') ? Object.keys(deviceDimensions) : [];
           if (outputDevice !== 'custom' && !known.includes(outputDevice)) {
@@ -1305,7 +1305,7 @@
           additionalProperties: false
         },
         annotations: { readOnlyHint: false },
-        execute: async ({ sourceIndex, targetIndex }, { signal }) => {
+        execute: async ({ sourceIndex, targetIndex } = {}, { signal } = {}) => {
           checkAborted(signal);
           if (typeof transferStyle !== 'function') throw new Error('transferStyle not available');
           if (sourceIndex < 0 || sourceIndex >= state.screenshots.length) {
@@ -1373,6 +1373,7 @@
     console.info(`[WebMCP] Registered ${ok}/${defs.length} tools`);
     if (typeof window !== 'undefined') {
       window.__webmcpTools = defs.map(d => d.name);
+      window.__webmcpVersion = 'fixed-signal-defaults-v2';
     }
   }
 
