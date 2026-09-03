@@ -15,11 +15,6 @@
   },
   "scripts": {
     "serve": "python3 -m http.server 8000",
-    "tauri": "tauri",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^2"
+    "build": "./scripts/build-dist.sh"
   }
 }
