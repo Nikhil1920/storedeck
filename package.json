@@ -1,17 +1,16 @@
 {
-  "name": "yuzu.shot",
+  "name": "storedeck",
   "version": "1.0.0",
-  "description": "App Store Screenshot Generator - Create beautiful App Store marketing screenshots",
+  "description": "Storedeck - Create beautiful App Store marketing screenshots",
   "author": {
-    "name": "YUZUHub",
-    "email": "hello@yuzuhub.com",
-    "url": "https://yuzuhub.com"
+    "name": "Storedeck",
+    "url": "https://storedeck.byanr.com"
   },
   "license": "MIT",
-  "homepage": "https://yuzu-hub.github.io/appscreen/",
+  "homepage": "https://storedeck.byanr.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YUZU-Hub/appscreen"
+    "url": "https://github.com/Nikhil1920/storedeck"
   },
   "scripts": {
     "serve": "python3 -m http.server 8000",

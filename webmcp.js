@@ -1,4 +1,4 @@
-// WebMCP Tools for AppScreen — Full autonomous workflow coverage (14 tools)
+// WebMCP Tools for Storedeck — Full autonomous workflow coverage (14 tools)
 // Exposes project, screenshot, background, device, text, language, elements,
 // popouts, output-size and export management to AI agents (ChatGPT, Claude, etc.)
 // Spec: https://webmachinelearning.github.io/webmcp/
@@ -430,7 +430,7 @@
             }
           } catch (e) { /* non-critical */ }
           return {
-            app: 'appscreen',
+            app: 'storedeck',
             project: {
               name: projectName,
               screenshotCount: state.screenshots.length,

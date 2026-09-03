@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-App Store Screenshot Generator - a browser-based tool for creating App Store marketing screenshots. Built with vanilla JavaScript, HTML5 Canvas, Three.js, and CSS. No build process required.
+Storedeck - a browser-based tool for creating App Store marketing screenshots. Built with vanilla JavaScript, HTML5 Canvas, Three.js, and CSS. No build process required.
 
 ## Agent Instructions
 
@@ -38,9 +38,11 @@ Open `http://localhost:8000` in browser. Opening `index.html` directly from file
 
 - `index.html` - UI structure with modals for settings, about, project management, translations, and language selection
 - `styles.css` - Dark theme styling, responsive layout with CSS Grid (3-column: left sidebar, canvas, right sidebar)
-- `app.js` - All application logic (~4400 lines)
+- `app.js` - All application logic (~8000 lines)
 - `three-renderer.js` - Three.js 3D rendering for iPhone mockups (~1000 lines)
 - `language-utils.js` - Language detection, localized image management, and translation dialogs (~500 lines)
+- `webmcp.js` - WebMCP site tools (14 domain-grouped tools) exposing the full app to AI agents for autonomous screenshot workflows
+- `AGENTS_SNIPPET.md` - Copy-paste agent instructions for end-user repos (use Storedeck website to create app store images)
 
 **Key patterns in app.js:**
 
@@ -68,7 +70,7 @@ Open `http://localhost:8000` in browser. Opening `index.html` directly from file
 **Multi-language text:**
 - `state.text.headlines` and `state.text.subheadlines` are objects keyed by language code
 - `getTextSettings()` returns either global or per-screenshot text depending on toggle state
-- AI translation calls Claude/OpenAI/Google API directly from browser (requires API key in settings)
+- AI translation/copy goes through WebMCP site tools in `webmcp.js` (no API keys, agent's own model generates text)
 
 **Localized screenshots (in language-utils.js):**
 - Each screenshot has `localizedImages` object keyed by language code (e.g., `{ 'en': {...}, 'de': {...} }`)
@@ -78,7 +80,7 @@ Open `http://localhost:8000` in browser. Opening `index.html` directly from file
 - Duplicate detection shows dialog with Replace/Create New/Skip options when uploading matching files
 
 **UI Components:**
-- Right sidebar has three tabs: Background, Device, Text
+- Right sidebar has five tabs: Background, Device, Text, Elements, Popouts
 - Collapsible toggle sections for Noise, Shadow, Border, Headline, Subheadline
 - Device tab has 2D/3D mode selector with different controls for each mode
 - Side preview carousel with sliding animation between screenshots
@@ -105,6 +107,13 @@ Open `http://localhost:8000` in browser. Opening `index.html` directly from file
 - `addLocalizedImage()` / `removeLocalizedImage()` - manage per-language images
 - `showDuplicateDialog()` - async dialog for handling duplicate uploads
 - `showExportLanguageDialog()` - dialog for choosing export scope (current/all languages)
+
+**WebMCP Site Tools (webmcp.js, 14 tools, grouped by domain with `action` params to keep agent context small):**
+- `get_app_state` - agent entry point: full project/screenshot/design snapshot (no image bytes)
+- `manage_project` (create|switch|rename) / `manage_screenshots` (upload|select|delete|duplicate|move) / `manage_languages` (add|remove|switch) / `manage_elements` (add|update|delete) / `manage_popouts` (add|update|delete)
+- `set_background` / `set_device` (incl. position presets, 2D/3D) / `set_text_content` (copy, bulk) / `set_text_style` / `set_output_size` / `transfer_style` (design setters support `applyToAll`)
+- `get_images` (batch or single full-res) / `export` (single screenshot or all, full-res PNG data URLs, state restored afterwards)
+- All writes call `syncUIWithState()` + `updateCanvas()` + `saveState()`; all respect the `signal` abort; per-action required fields are validated in `execute()`
 
 ## External Dependencies
 

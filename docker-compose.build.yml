@@ -1,10 +1,10 @@
 services:
-  appscreen:
+  storedeck:
     build:
       context: .
       dockerfile: Dockerfile
-    image: appscreen:latest
-    container_name: appscreen
+    image: storedeck:latest
+    container_name: storedeck
     ports:
       - "8080:80"
     restart: unless-stopped

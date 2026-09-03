@@ -3801,7 +3801,7 @@ function setupEventListeners() {
             const blob = new Blob([json], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'appscreen-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.download = 'storedeck-backup-' + new Date().toISOString().slice(0, 10) + '.json';
             a.click();
             URL.revokeObjectURL(a.href);
         } catch (e) {

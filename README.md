@@ -1,15 +1,13 @@
-# App Store Screenshot Generator
+# Storedeck
 
 A free, open-source tool for creating beautiful App Store screenshots with customizable backgrounds, text overlays, and 3D device mockups.
 
 
-**[Start using it now. Hosted on GitHub Pages](https://yuzu-hub.github.io/appscreen/)**
+**[Start using it now](https://storedeck.byanr.com)**
 
-![App Store Screenshot Generator](img/screenshot-generator.png)
+![Storedeck](img/screenshot-generator.png)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-> 🍋 **Built by [YuzuHub](https://yuzuhub.com)** — We build smart AI products in Düsseldorf, Germany. Check out [yuzu.chat](https://yuzu.chat), [Eno](https://eno.yuzuhub.com), [VoltPlan](https://voltplan.app) and more.
 
 ## Features
 
@@ -64,7 +62,7 @@ A free, open-source tool for creating beautiful App Store screenshots with custo
 
 ### Just Want to Use It?
 
-Visit **[yuzu-hub.github.io/appscreen](https://yuzu-hub.github.io/appscreen/)** to use the tool directly in your browser. No installation needed!
+Visit **[storedeck.byanr.com](https://storedeck.byanr.com)** to use the tool directly in your browser. No installation needed!
 
 ---
 
@@ -109,7 +107,7 @@ Since this app uses IndexedDB for persistence, you need to serve it through a lo
 
 ```bash
 # Using Python
-cd appscreen
+cd storedeck
 python3 -m http.server 8000
 
 # Using Node.js
@@ -128,7 +126,7 @@ Run the pre-built Docker image from GitHub Container Registry:
 
 ```bash
 # Using Docker directly
-docker run -d -p 8080:80 ghcr.io/yuzu-hub/appscreen:latest
+docker run -d -p 8080:80 ghcr.io/nikhil1920/storedeck:latest
 
 # Using Docker Compose
 docker compose up -d
@@ -168,6 +166,22 @@ Translations are now powered by **WebMCP site tools** — no API keys needed.
 
 Learn more: [WebMCP spec](https://webmachinelearning.github.io/webmcp/) · [ChatGPT Site Tools docs](https://learn.chatgpt.com/docs/webmcp)
 
+## Autonomous Agent Workflow (App Store images end-to-end)
+
+The app exposes **14 WebMCP site tools** (`webmcp.js`) covering the full
+workflow: project management, screenshot upload, copy, design (background /
+device / text / output size), overlays (elements / popouts), and
+full-resolution PNG export. Tools are grouped by domain with an `action`
+parameter (e.g. `manage_screenshots` with upload|select|delete|duplicate|move)
+to keep agent context usage small.
+
+If you want a coding agent to create App Store images for your own app,
+copy the instructions from [`AGENTS_SNIPPET.md`](AGENTS_SNIPPET.md) into
+your project's `AGENTS.md`. The agent will then take simulator
+screenshots, open this website, upload them, add titles/subtitles, ask you
+for feedback, apply revisions, and export the finals for upload to
+App Store Connect.
+
 ## Tech Stack
 
 - Vanilla JavaScript (no frameworks)
@@ -204,6 +218,6 @@ MIT License - feel free to use, modify, and distribute.
 
 - **iPhone 15 Pro Max 3D Model** by [MajdyModels](https://sketchfab.com/majdymodels) - Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
-## Author
+## Acknowledgements
 
-Proudly vibe coded by [Stefan](https://github.com/BlackMac) at [YuzuHub](https://yuzuhub.com/en) — building smart AI products from Düsseldorf, Germany.
+Storedeck is a fork of [AppScreen](https://github.com/YUZU-Hub/appscreen) by [YUZU-Hub](https://yuzuhub.com) — thanks to the original authors for the great foundation.

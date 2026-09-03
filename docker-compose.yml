@@ -1,7 +1,7 @@
 services:
-  appscreen:
-    image: ghcr.io/yuzu-hub/appscreen:latest
-    container_name: appscreen
+  storedeck:
+    image: ghcr.io/nikhil1920/storedeck:latest
+    container_name: storedeck
     ports:
       - "8080:80"
     restart: unless-stopped
