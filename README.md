@@ -9,6 +9,24 @@ A free, open-source tool for creating beautiful App Store screenshots with custo
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+## Demo — Veena (before → after, EN + TE)
+
+See **[demo/README.md](demo/README.md)** for the full walkthrough: raw simulator
+captures → styled App Store screenshots in English and Telugu, with the copy
+used and the original agent prompt.
+
+| Before (simulator) | After (English) | After (Telugu) |
+|--------------------|-----------------|----------------|
+| ![Veena before](demo/veena/before/01-dictate.png) | ![Veena after EN](demo/veena/after/en/01-dictate.png) | ![Veena after TE](demo/veena/after/te/01-dictate.png) |
+
+Created with `agent-browser` + WebMCP site tools using this prompt:
+
+> I have simulator screenshots of Veena a speech to text application that
+> supports 22 Indian languages … use agent-browser open
+> "https://storedeck.byanr.com" and use the webmcp tools available to create
+> Stylised App Store screenshots … with a heading and a subheading … minimal
+> and aesthetically pleasing … in both english and telugu languages.
+
 ## Features
 
 ### Output & Export
@@ -211,7 +229,7 @@ Built something with this tool? Add your app to the list by submitting a pull re
 
 ## License
 
-MIT License - feel free to use, modify, and distribute.
+MIT License — see [LICENSE](LICENSE). Feel free to use, modify, and distribute.
 
 ## Credits
 - **Samsung Galaxy S25 Ultra 3D Model** by [mistJS](https://sketchfab.com/mistjs) - Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
