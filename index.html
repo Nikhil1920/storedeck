@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Store Screenshot Generator</title>
+    <title>Storedeck - App Store Screenshot Generator</title>
     <meta name="description" content="Free tool for creating beautiful App Store screenshots with customizable backgrounds, text overlays, and device frames.">
-    <meta name="author" content="Stefan from yuzuhub.com">
+    <meta name="author" content="Storedeck">
 
     <!-- Open Graph / Social -->
-    <meta property="og:title" content="App Store Screenshot Generator">
+    <meta property="og:title" content="Storedeck - App Store Screenshot Generator">
     <meta property="og:description" content="Free tool for creating beautiful App Store screenshots with customizable backgrounds, text overlays, and device frames.">
     <meta property="og:type" content="website">
 
@@ -16,51 +16,6 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23667eea'/><rect x='20' y='30' width='60' height='45' rx='5' fill='white'/><circle cx='50' cy='20' r='5' fill='white'/></svg>">
 
     <link rel="stylesheet" href="styles.css">
-
-    <!-- Detect Tauri and add class for native styling -->
-    <script>
-        if (window.__TAURI__) {
-            document.documentElement.classList.add('tauri-app');
-            document.addEventListener('DOMContentLoaded', () => {
-                document.body.classList.add('tauri-app');
-                // Add a real DOM element for the draggable title bar
-                const titlebar = document.createElement('div');
-                titlebar.className = 'tauri-titlebar';
-                titlebar.setAttribute('data-tauri-drag-region', '');
-                document.body.insertBefore(titlebar, document.body.firstChild);
-
-                // Listen for menu actions from Tauri backend
-                window.__TAURI__.event.listen('menu-action', (event) => {
-                    switch (event.payload) {
-                        case 'new-project':
-                            createProject();
-                            break;
-                        case 'import-screenshots':
-                            importScreenshotsFromTauri();
-                            break;
-                        case 'export-current':
-                            exportCurrent();
-                            break;
-                        case 'export-all':
-                            exportAll();
-                            break;
-                        case 'settings':
-                            document.getElementById('settings-btn')?.click();
-                            break;
-                    }
-                });
-
-                // Handle external links - open in system browser
-                document.addEventListener('click', (e) => {
-                    const link = e.target.closest('a[target="_blank"]');
-                    if (link) {
-                        e.preventDefault();
-                        window.__TAURI__.opener.openUrl(link.href);
-                    }
-                });
-            });
-        }
-    </script>
 
     <!-- JSZip for ZIP downloads -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1550,7 +1505,7 @@
         </div>
     </div>
 
-    <!-- Magical Titles Confirmation Modal -->
+    <!-- Magical Titles Confirmation Modal (WebMCP) -->
     <div class="modal-overlay" id="magical-titles-modal">
         <div class="modal">
             <div class="modal-icon" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 140, 0, 0.2) 100%);">
@@ -1559,8 +1514,14 @@
                 </svg>
             </div>
             <h3 class="modal-title">Generate Magical Titles</h3>
-            <p class="modal-message">This will use AI to analyze your screenshots and generate marketing headlines and subheadlines for each screen.</p>
-            <p class="modal-message" style="margin-top: 8px; font-size: 12px; color: var(--text-tertiary);">Screenshots: <span id="magical-titles-count">0</span> · Provider: <span id="magical-titles-provider">-</span></p>
+            <p class="modal-message">This will use your AI assistant via WebMCP site tools to analyze your screenshots and generate marketing headlines and subheadlines. No API keys needed.</p>
+            <p class="modal-message" style="margin-top: 8px; font-size: 12px; color: var(--text-tertiary);">Screenshots: <span id="magical-titles-count">0</span> · Language: <span id="magical-titles-provider">-</span></p>
+            <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 12px; color: var(--text-secondary); line-height: 1.4; text-align: left;">
+                <span style="font-weight: 600;">✨ How it works via Site Tools</span><br>
+                1. Select language below and click <strong>Generate via Site Tools</strong><br>
+                2. If your browser supports WebMCP (e.g., ChatGPT desktop app), your AI assistant will be prompted to analyze screenshots (<code>get_screenshot_images</code>) and apply titles (<code>generate_magical_titles</code>).<br>
+                3. Otherwise, you'll see instructions to ask your assistant manually.
+            </div>
             <div class="translate-source" style="margin-top: 16px;">
                 <label class="control-label">Generate titles in</label>
                 <select id="magical-titles-language" style="margin-bottom: 0;">
@@ -1569,7 +1530,7 @@
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-cancel" id="magical-titles-cancel">Cancel</button>
-                <button class="modal-btn modal-btn-confirm" id="magical-titles-confirm" style="background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);">Generate Titles</button>
+                <button class="modal-btn modal-btn-confirm" id="magical-titles-confirm" style="background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);">Generate via Site Tools</button>
             </div>
         </div>
     </div>
@@ -1609,13 +1570,10 @@
                     <option value="en">🇺🇸 English (US)</option>
                 </select>
                 <div class="source-text-preview" id="source-text-preview">No text entered</div>
-                <button class="ai-translate-btn" id="ai-translate-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
-                    <span>Auto-translate with AI</span>
-                </button>
-                <div class="ai-translate-status" id="ai-translate-status"></div>
+                <div class="webmcp-hint" style="background: var(--bg-tertiary); border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+                    <span style="font-weight: 600;">✨ AI Translation via Site Tools</span><br>
+                    Open this page in ChatGPT desktop app and ask your AI assistant to translate — it will use site tools automatically. You can also type translations manually below.
+                </div>
             </div>
 
             <div class="translate-targets" id="translate-targets">
@@ -1644,118 +1602,14 @@
             <div class="settings-section">
                 <h4 class="settings-section-title">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        <path d="M12 2l2 4M12 8v4m-8 2a9 9 0 1 0 16 0 9 9 0 0 0-16 0z"/>
                     </svg>
-                    AI Translation Provider
+                    AI Translation via Site Tools
                 </h4>
-                <p class="settings-description">Choose which AI provider to use for translations. API keys are stored locally in your browser.</p>
-                <div class="settings-provider-selector">
-                    <label class="settings-provider-option">
-                        <input type="radio" name="ai-provider" value="anthropic" checked>
-                        <span class="provider-label">Anthropic (Claude)</span>
-                    </label>
-                    <label class="settings-provider-option">
-                        <input type="radio" name="ai-provider" value="openai">
-                        <span class="provider-label">OpenAI (GPT)</span>
-                    </label>
-                    <label class="settings-provider-option">
-                        <input type="radio" name="ai-provider" value="google">
-                        <span class="provider-label">Google (Gemini)</span>
-                    </label>
+                <p class="settings-description">Translations are now handled by your AI assistant via WebMCP site tools. Open this page in the ChatGPT desktop app and ask it to translate — no API keys needed. See <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" style="color: var(--accent);">WebMCP spec</a> for details.</p>
+                <div id="webmcp-status" style="background: var(--bg-tertiary); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--text-secondary); margin-top: 10px;">
+                    Checking site tools support...
                 </div>
-            </div>
-
-            <div class="settings-section settings-api-section" id="settings-anthropic" data-provider="anthropic">
-                <h4 class="settings-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                    </svg>
-                    Claude API Key
-                </h4>
-                <div class="settings-input-group">
-                    <input type="password" id="settings-api-key-anthropic" placeholder="sk-ant-api03-..." />
-                    <button class="settings-show-key" data-target="settings-api-key-anthropic" title="Show/hide key">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="settings-key-status" id="settings-key-status-anthropic"></div>
-                <div class="settings-model-group">
-                    <label class="settings-model-label">Model</label>
-                    <select id="settings-model-anthropic" class="settings-model-select">
-                        <!-- Populated dynamically from llm.js -->
-                    </select>
-                </div>
-                <a href="https://console.anthropic.com/settings/keys" target="_blank" class="settings-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
-                    Get your API key from Anthropic Console
-                </a>
-            </div>
-
-            <div class="settings-section settings-api-section" id="settings-openai" data-provider="openai" style="display: none;">
-                <h4 class="settings-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                    </svg>
-                    OpenAI API Key
-                </h4>
-                <div class="settings-input-group">
-                    <input type="password" id="settings-api-key-openai" placeholder="sk-..." />
-                    <button class="settings-show-key" data-target="settings-api-key-openai" title="Show/hide key">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="settings-key-status" id="settings-key-status-openai"></div>
-                <div class="settings-model-group">
-                    <label class="settings-model-label">Model</label>
-                    <select id="settings-model-openai" class="settings-model-select">
-                        <!-- Populated dynamically from llm.js -->
-                    </select>
-                </div>
-                <a href="https://platform.openai.com/api-keys" target="_blank" class="settings-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
-                    Get your API key from OpenAI Platform
-                </a>
-            </div>
-
-            <div class="settings-section settings-api-section" id="settings-google" data-provider="google" style="display: none;">
-                <h4 class="settings-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                    </svg>
-                    Google AI API Key
-                </h4>
-                <div class="settings-input-group">
-                    <input type="password" id="settings-api-key-google" placeholder="AIza..." />
-                    <button class="settings-show-key" data-target="settings-api-key-google" title="Show/hide key">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="settings-key-status" id="settings-key-status-google"></div>
-                <div class="settings-model-group">
-                    <label class="settings-model-label">Model</label>
-                    <select id="settings-model-google" class="settings-model-select">
-                        <!-- Populated dynamically from llm.js -->
-                    </select>
-                </div>
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="settings-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
-                    </svg>
-                    Get your API key from Google AI Studio
-                </a>
             </div>
 
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px;">
@@ -1780,13 +1634,13 @@
             <div class="modal-icon" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);">
                 <img src="img/info.svg" width="32" height="32" alt="Info" style="filter: invert(0.5) sepia(1) saturate(5) hue-rotate(200deg);">
             </div>
-            <h3 class="modal-title">App Store Screenshot Generator</h3>
-            <p class="modal-message" style="margin-bottom: 16px;">A free vibe coded tool for creating beautiful App Store screenshots with customizable backgrounds, text overlays, and device frames.</p>
-            <p class="modal-message" style="margin-bottom: 16px;">Created by <a href="https://yuzuhub.com/en" target="_blank" style="color: var(--accent);">Stefan from yuzuhub.com</a></p>
+            <h3 class="modal-title">Storedeck</h3>
+            <p class="modal-message" style="margin-bottom: 16px;">A free open-source tool for creating beautiful App Store screenshots with customizable backgrounds, text overlays, and device frames.</p>
+            <p class="modal-message" style="margin-bottom: 16px;">Forked from <a href="https://github.com/YUZU-Hub/appscreen" target="_blank" style="color: var(--accent);">AppScreen by YUZU-Hub</a> — thanks to the original authors.</p>
             <p class="modal-message" style="margin-bottom: 16px;">This project is free and open source under the MIT License.</p>
             <p class="modal-message" style="margin-bottom: 8px;">
-                <a href="https://yuzu-hub.github.io/appscreen/" target="_blank" style="color: var(--accent);">Live Version</a> ·
-                <a href="https://github.com/YUZU-Hub/appscreen" target="_blank" style="color: var(--accent);">GitHub Repo</a>
+                <a href="https://storedeck.byanr.com" target="_blank" style="color: var(--accent);">Live Version</a> ·
+                <a href="https://github.com/Nikhil1920/storedeck" target="_blank" style="color: var(--accent);">GitHub Repo</a>
             </p>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-confirm" id="about-modal-close" style="background: var(--accent);">Close</button>
@@ -1960,11 +1814,10 @@
         </div>
     </div>
 
-    <script src="llm.js"></script>
     <script src="language-utils.js"></script>
-    <script src="magical-titles.js"></script>
     <script src="lucide-icons.js"></script>
     <script src="three-renderer.js"></script>
     <script src="app.js"></script>
+    <script src="webmcp.js?v=2"></script>
 </body>
 </html>

@@ -1,9 +1,9 @@
-# App Store Screenshot Generator
+# Storedeck
 # Lightweight nginx container serving static files
 
 FROM nginx:alpine
 
-LABEL maintainer="App Store Screenshot Generator"
+LABEL maintainer="Storedeck"
 LABEL description="Browser-based tool for creating App Store marketing screenshots"
 
 # Remove default nginx static assets
@@ -15,8 +15,7 @@ COPY app.js /usr/share/nginx/html/
 COPY styles.css /usr/share/nginx/html/
 COPY three-renderer.js /usr/share/nginx/html/
 COPY language-utils.js /usr/share/nginx/html/
-COPY magical-titles.js /usr/share/nginx/html/
-COPY llm.js /usr/share/nginx/html/
+COPY webmcp.js /usr/share/nginx/html/
 
 # Copy assets
 COPY models/ /usr/share/nginx/html/models/
