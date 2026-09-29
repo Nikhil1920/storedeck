@@ -6521,7 +6521,7 @@ function renderScreenshotToCanvas(index, targetCanvas, targetCtx, dims, previewS
     const use3D = settings.use3D || false;
 
     if (img) {
-        if (use3D && typeof renderThreeJSForScreenshot === 'function' && phoneModelLoaded) {
+        if (use3D && typeof renderThreeJSForScreenshot === 'function' && isPhoneModelReady(settings.device3D || 'iphone')) {
             // Render 3D phone model for this specific screenshot
             renderThreeJSForScreenshot(targetCanvas, dims.width, dims.height, index);
         } else {

@@ -213,24 +213,57 @@
     return src;
   }
 
-  // Render one screenshot offscreen at full export resolution and return dataUrl.
-  // Temporarily switches selection/language, then restores everything.
-  function renderExportDataUrl(index, lang) {
-    const originalIndex = state.selectedIndex;
+  function waitForRenderAsset(promise, signal) {
+    checkAborted(signal);
+    return new Promise((resolve, reject) => {
+      const finish = (callback, value) => {
+        clearTimeout(timeout);
+        if (signal) signal.removeEventListener('abort', onAbort);
+        callback(value);
+      };
+      const onAbort = () => finish(reject, abortError());
+      const timeout = setTimeout(() => finish(reject, new Error('Timed out preparing screenshot assets; retry after the device model and fonts finish loading')), 15000);
+      if (signal) signal.addEventListener('abort', onAbort, { once: true });
+      Promise.resolve(promise).then(value => finish(resolve, value), error => finish(reject, error));
+    });
+  }
+
+  // Prepare assets before temporarily changing state, so asynchronous model/font
+  // loading never persists an export's temporary selection or language.
+  async function prepareScreenshotRendering(index, signal) {
+    checkAborted(signal);
+    const screenshot = state.screenshots[index];
+    if (!screenshot) throw new Error(`Screenshot index ${index} out of range`);
+    if (document.fonts && document.fonts.ready) {
+      await waitForRenderAsset(document.fonts.ready, signal);
+    }
+    if (screenshot.screenshot && screenshot.screenshot.use3D) {
+      if (typeof prepareThreeJSForScreenshot !== 'function') {
+        throw new Error('3D renderer not available (app still initializing)');
+      }
+      await waitForRenderAsset(prepareThreeJSForScreenshot(index), signal);
+    }
+    checkAborted(signal);
+  }
+
+  // Render at export resolution to preserve absolute font sizes, then optionally
+  // downsample for QA. No UI refresh/save is needed for an offscreen render.
+  async function renderExportDataUrl(index, lang, { maxDimension, signal } = {}) {
+    await prepareScreenshotRendering(index, signal);
     const originalLang = state.currentLanguage;
-    const originalTextLangs = state.screenshots.map(s => ({
-      headline: s.text ? s.text.currentHeadlineLang : null,
-      subheadline: s.text ? s.text.currentSubheadlineLang : null
-    }));
+    const target = state.screenshots[index];
+    const originalText = target.text;
     try {
       const targetLang = lang || state.currentLanguage;
       state.currentLanguage = targetLang;
-      const target = state.screenshots[index];
-      if (target && target.text) {
+      if (originalText) {
+        // Layout resolution may lazily populate languageSettings; keep those
+        // changes on the temporary copy as well as the language selectors.
+        target.text = JSON.parse(JSON.stringify(originalText));
         target.text.currentHeadlineLang = targetLang;
         target.text.currentSubheadlineLang = targetLang;
+        target.text.currentLayoutLang = targetLang;
       }
-      state.selectedIndex = index;
       const dims = getDims();
       const off = document.createElement('canvas');
       off.width = dims.width;
@@ -240,18 +273,22 @@
         throw new Error('Export renderer not available (app still initializing)');
       }
       renderScreenshotToCanvas(index, off, offCtx, dims, 1);
-      const dataUrl = off.toDataURL('image/png');
-      return { dataUrl, width: dims.width, height: dims.height, language: targetLang };
+      let output = off;
+      if (maxDimension && Math.max(dims.width, dims.height) > maxDimension) {
+        const scale = maxDimension / Math.max(dims.width, dims.height);
+        output = document.createElement('canvas');
+        output.width = Math.max(1, Math.round(dims.width * scale));
+        output.height = Math.max(1, Math.round(dims.height * scale));
+        const outputCtx = output.getContext('2d');
+        outputCtx.imageSmoothingEnabled = true;
+        outputCtx.imageSmoothingQuality = 'high';
+        outputCtx.drawImage(off, 0, 0, output.width, output.height);
+      }
+      const dataUrl = output.toDataURL('image/png');
+      return { dataUrl, width: output.width, height: output.height, language: targetLang, outputWidth: dims.width, outputHeight: dims.height };
     } finally {
-      state.selectedIndex = originalIndex;
       state.currentLanguage = originalLang;
-      state.screenshots.forEach((s, i) => {
-        if (s.text && originalTextLangs[i]) {
-          if (originalTextLangs[i].headline) s.text.currentHeadlineLang = originalTextLangs[i].headline;
-          if (originalTextLangs[i].subheadline) s.text.currentSubheadlineLang = originalTextLangs[i].subheadline;
-        }
-      });
-      if (typeof updateCanvas === 'function') updateCanvas();
+      if (originalText) target.text = originalText;
     }
   }
 
@@ -979,19 +1016,40 @@
       },
       {
         name: 'get_images',
-        description: 'Get screenshot IMAGE data for vision (copywriting, design review). Without screenshotIndex returns up to maxImages screenshots in the given language as data URLs (large images are truncated — then request them individually); with screenshotIndex returns that one screenshot at full resolution. Defaults to the current project language.',
+        description: 'Get images for vision. Set rendered:true for styled PNG previews (background, device, text, elements and popouts), bounded to maxDimension pixels on the longest side (default 900, max 1200); use these for design QA and export for full-resolution finals. Without rendered, returns original uploaded images (large batch images are omitted — request individually). screenshotIndex selects one; omit for up to maxImages (default 10). Defaults to current language. Preview rendering preserves selection/language and waits for fonts and 3D models.',
         inputSchema: {
           type: 'object',
           properties: {
-            screenshotIndex: { type: 'integer', minimum: 0, description: 'Optional; when given, returns this one screenshot full-res' },
+            screenshotIndex: { type: 'integer', minimum: 0, description: 'Optional; return one original image or styled preview.' },
             language: { type: 'string', description: "Language code, e.g. 'en'. Defaults to current." },
-            maxImages: { type: 'integer', minimum: 1, maximum: 10, description: 'Batch mode only (default 10).' }
+            maxImages: { type: 'integer', minimum: 1, maximum: 10, description: 'Batch mode only (default 10).' },
+            rendered: { type: 'boolean', description: 'Return styled previews instead of original uploads (default false).' },
+            maxDimension: { type: 'integer', minimum: 200, maximum: 1200, description: 'Rendered previews only: maximum width or height in pixels (default 900). Never upscales.' }
           },
           additionalProperties: false
         },
         annotations: { readOnlyHint: true },
-        execute: async ({ screenshotIndex, language, maxImages } = {}) => {
+        execute: async ({ screenshotIndex, language, maxImages, rendered = false, maxDimension = 900 } = {}, { signal } = {}) => {
+          checkAborted(signal);
           const lang = language || state.currentLanguage || state.projectLanguages[0] || 'en';
+          if (rendered) {
+            if (!Number.isInteger(maxDimension) || maxDimension < 200 || maxDimension > 1200) {
+              throw new Error('maxDimension must be an integer from 200 to 1200');
+            }
+            if (!state.projectLanguages.includes(lang)) throw new Error(`Language "${lang}" not in project`);
+            const limit = maxImages === undefined ? 10 : maxImages;
+            if (!Number.isInteger(limit) || limit < 1 || limit > 10) throw new Error('maxImages must be an integer from 1 to 10');
+            const indices = typeof screenshotIndex === 'number'
+              ? [resolveTargetIndex(screenshotIndex)]
+              : state.screenshots.slice(0, limit).map((_, i) => i);
+            const images = [];
+            for (const index of indices) {
+              const preview = await renderExportDataUrl(index, lang, { maxDimension, signal });
+              images.push({ index, name: state.screenshots[index].name || `Screenshot ${index + 1}`, rendered: true, ...preview, sizeKB: Math.round(preview.dataUrl.length / 1024) });
+            }
+            if (typeof screenshotIndex === 'number') return images[0];
+            return { rendered: true, language: lang, count: images.length, totalScreenshots: state.screenshots.length, images };
+          }
           if (typeof screenshotIndex === 'number') {
             const s = state.screenshots[screenshotIndex];
             if (!s) throw new Error(`Screenshot index ${screenshotIndex} out of range`);
@@ -1252,7 +1310,7 @@
           }
           if (typeof screenshotIndex === 'number') {
             const idx = resolveTargetIndex(screenshotIndex);
-            const rendered = renderExportDataUrl(idx, lang);
+            const rendered = await renderExportDataUrl(idx, lang, { signal });
             checkAborted(signal);
             return {
               mode: 'single',
@@ -1270,7 +1328,7 @@
           const exports = [];
           for (let i = 0; i < state.screenshots.length; i++) {
             checkAborted(signal);
-            const rendered = renderExportDataUrl(i, lang);
+            const rendered = await renderExportDataUrl(i, lang, { signal });
             exports.push({
               index: i,
               filename: `screenshot-${i + 1}.png`,
@@ -1373,7 +1431,7 @@
     console.info(`[WebMCP] Registered ${ok}/${defs.length} tools`);
     if (typeof window !== 'undefined') {
       window.__webmcpTools = defs.map(d => d.name);
-      window.__webmcpVersion = 'fixed-signal-defaults-v2';
+      window.__webmcpVersion = 'rendered-previews-v3';
     }
   }
 

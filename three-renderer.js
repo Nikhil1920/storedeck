@@ -809,6 +809,20 @@ function renderThreeJSToCanvas(targetCanvas, width, height) {
     phonePivot.rotation.copy(originalRotation);
 }
 
+function isPhoneModelReady(deviceType) {
+    return !!((deviceType === currentDeviceModel && phoneModelLoaded && phonePivot)
+        || phoneModelCache[deviceType]?.loaded);
+}
+
+// Exports and WebMCP previews must await the requested model, including models
+// for screenshots other than the current UI selection.
+async function prepareThreeJSForScreenshot(screenshotIndex) {
+    if (!isThreeJSInitialized) initThreeJS();
+    if (!threeRenderer) throw new Error('Could not initialize the 3D renderer');
+    const deviceType = state.screenshots[screenshotIndex]?.screenshot?.device3D || 'iphone';
+    if (!isPhoneModelReady(deviceType)) await loadCachedPhoneModel(deviceType);
+}
+
 // Render 3D for a specific screenshot index (used for side previews)
 function renderThreeJSForScreenshot(targetCanvas, width, height, screenshotIndex) {
     if (!threeRenderer || !threeScene || !threeCamera) return;
@@ -823,7 +837,7 @@ function renderThreeJSForScreenshot(targetCanvas, width, height, screenshotIndex
     const config = deviceConfigs[screenshotDeviceType] || deviceConfigs.iphone;
 
     // Check if this screenshot uses the same device as currently active
-    const useCurrentModel = screenshotDeviceType === currentDeviceModel && phonePivot;
+    const useCurrentModel = screenshotDeviceType === currentDeviceModel && phoneModelLoaded && phonePivot;
 
     // Get the model to use (either current or from cache)
     let pivotToUse, screenPlaneToUse;

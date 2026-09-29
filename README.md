@@ -193,6 +193,16 @@ full-resolution PNG export. Tools are grouped by domain with an `action`
 parameter (e.g. `manage_screenshots` with upload|select|delete|duplicate|move)
 to keep agent context usage small.
 
+For visual QA, call `get_images` with `rendered: true` and an optional
+`screenshotIndex`. This returns the styled composition as a PNG preview,
+with its longest side capped at 900 pixels by default. Set `maxDimension`
+between 200 and 1200 to adjust preview detail; previews never upscale.
+The render waits for fonts and 3D models and preserves the selected screenshot
+and language. Use `export` for full-resolution store assets.
+
+Run focused WebMCP rendering checks with `npm test` and create the static bundle
+with `npm run build`.
+
 If you want a coding agent to create App Store images for your own app,
 copy the instructions from [`AGENTS_SNIPPET.md`](AGENTS_SNIPPET.md) into
 your project's `AGENTS.md`. The agent will then take simulator

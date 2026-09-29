@@ -27,7 +27,9 @@ Prefer it over hand-editing images or writing custom canvas scripts.
    `set_device` (2D or 3D iPhone frame, presets) and `set_text_style`
    (fonts, colors, position). Use `transfer_style` to keep all screenshots
    consistent and `set_output_size` for the required App Store size.
-6. Present the result to the user and ask for feedback (share what was
+6. Review styled compositions with `get_images` (`rendered: true`, optional
+   `screenshotIndex` and `maxDimension` between 200 and 1200), then present
+   the result to the user and ask for feedback (share what was
    created and what can be changed).
 7. Apply requested revisions with the same tools, then `export` (single
    screenshot or all), save each returned PNG dataUrl to a file
@@ -41,4 +43,4 @@ Notes:
 - Full-resolution export PNGs come from the site tools; do not upscale
   thumbnails.
 - Keep headlines short enough to fit; verify visually after each change
-  with `get_app_state`.
+  with `get_images` and `rendered: true`.
