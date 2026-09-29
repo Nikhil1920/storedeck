@@ -1,229 +1,90 @@
 # Storedeck
 
-A free, open-source tool for creating beautiful App Store screenshots with customizable backgrounds, text overlays, and 3D device mockups.
+Free, open-source editor for **store screenshots on every platform** — App Store,
+Google Play, Mac App Store, Microsoft Store, Steam, Amazon Fire TV and smart-TV
+stores — with **A/B test variants**, **localization** and full **AI-agent
+control through WebMCP**.
 
+**[Open the editor](https://storedeck.byanr.com/editor)** · [Guides](https://storedeck.byanr.com/guides) · [Screenshot sizes](https://storedeck.byanr.com/screenshot-sizes) · [For AI agents](https://storedeck.byanr.com/agents)
 
-**[Start using it now](https://storedeck.byanr.com)**
-
-![Storedeck](img/screenshot-generator.png)
+![Storedeck](public/og.jpg)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+## How it's organized
+
+| Level | What it is |
+| --- | --- |
+| **Project** | One app — its languages and every screenshot set you make for it |
+| **Variant** | An A/B test arm (draft · control · testing · winner · archived) with a hypothesis |
+| **Platform** | A store + device + exact size: iPhone 6.9", Android phone, iPad 13", Mac, Apple TV, Windows, Steam, Fire TV… |
+| **Language** | Copy and screenshots per locale, with fallbacks and per-language layout overrides |
+
+## Features
+
+- **22 platforms across 7 stores** with the exact sizes, counts and formats each accepts ([catalog](src/lib/model/platforms.ts)); custom sizes are validated against store rules.
+- **Copy a platform to another** — start Android, iPad or TV from your iPhone set; screens, copy and styling rescale automatically.
+- **Localization** — filename language detection (`home_de.png`), strings table with missing translations, board view of every screen × language, RTL rendering, CJK/Thai line breaking, per-language sizes.
+- **A/B variants** — duplicate a whole set, record status and hypothesis, compare side by side, export per variant for App Store Product Page Optimization or Google Play store listing experiments.
+- **Design** — gradients (CSS-accurate angles, radial), solid or image backgrounds, noise, overlays; 2D device frames (phone, tablet, watch, laptop, monitor, app window, browser, TV); 3D iPhone 15 Pro Max and Galaxy S25 Ultra; layout presets including side-by-side for landscape; Google Fonts; overlay elements (text badges with pill/laurel frames, emoji, 1,900+ Lucide icons, images); magnified popouts.
+- **Undo/redo**, autosave to IndexedDB, project backup files, import of projects from Storedeck v1.
+- **Export** PNG/JPEG at store sizes (never with alpha), zipped as `variant/platform-WxH/language/NN-name.png`.
+- **SEO & discovery** — prerendered guides, FAQ and per-store size pages with JSON-LD, sitemap, `llms.txt` and `llms-full.txt`.
+
+## AI agents (WebMCP)
+
+Storedeck registers **22 WebMCP tools** with `document.modelContext` on every
+page, covering the whole editor: projects, variants, platforms, screens,
+languages, copy, backgrounds, devices, typography, elements, popouts, views,
+undo/redo, rendered previews with layout warnings, and export. Without WebMCP,
+the same tools are callable as `window.storedeck.callTool(name, input)`.
+
+- Tool reference: [storedeck.byanr.com/agents](https://storedeck.byanr.com/agents) (generated from [`src/lib/webmcp/specs.ts`](src/lib/webmcp/specs.ts))
+- Drop [`AGENTS_SNIPPET.md`](AGENTS_SNIPPET.md) into your app repo's `AGENTS.md` so coding agents can refresh your store screenshots end to end.
+
 ## Demo — Veena (before → after, EN + TE)
 
-See **[demo/README.md](demo/README.md)** for the full walkthrough: raw simulator
-captures → styled App Store screenshots in English and Telugu, with the copy
-used and the original agent prompt.
+See **[demo/README.md](demo/README.md)** — raw simulator captures turned into
+styled App Store screenshots in English and Telugu by an agent using the WebMCP
+tools.
 
 | Before (simulator) | After (English) | After (Telugu) |
 |--------------------|-----------------|----------------|
 | ![Veena before](demo/veena/before/01-dictate.png) | ![Veena after EN](demo/veena/after/en/01-dictate.png) | ![Veena after TE](demo/veena/after/te/01-dictate.png) |
 
-Created with `agent-browser` + WebMCP site tools using this prompt:
+## Development
 
-> I have simulator screenshots of Veena a speech to text application that
-> supports 22 Indian languages … use agent-browser open
-> "https://storedeck.byanr.com" and use the webmcp tools available to create
-> Stylised App Store screenshots … with a heading and a subheading … minimal
-> and aesthetically pleasing … in both english and telugu languages.
-
-## Features
-
-### Output & Export
-- **Multiple Output Sizes**: iPhone 6.9", 6.7", 6.5", 5.5" and iPad 12.9", 11" App Store requirements, plus custom sizes
-- **Batch Export**: Export all screenshots at once as a ZIP file
-- **Per-Screenshot Settings**: Each screenshot can have its own background, device settings, and text
-
-### Backgrounds
-- **Gradient Backgrounds**: Multi-stop gradients with draggable color stops and angle control
-- **Preset Gradients**: Quick-access gradient presets for common styles
-- **Solid Color**: Simple single-color backgrounds
-- **Image Backgrounds**: Upload custom images with blur, overlay, and fit options
-- **Noise Overlay**: Add subtle noise texture to any background
-
-### Device Mockups
-- **2D Mode**: Position, scale, rotate, and adjust corner radius of screenshots
-- **3D Mode**: Interactive iPhone 15 Pro Max 3D mockup with drag-to-rotate
-- **Position Presets**: Centered, bleed, tilt left/right, perspective, and more
-- **Shadow Effects**: Customizable drop shadows with color, blur, opacity, and offset
-- **Border Effects**: Add borders around screenshots with adjustable width and opacity
-
-### Text Overlays
-- **Headlines & Subheadlines**: Separate controls with enable/disable toggles
-- **Font Picker**: Access to 1500+ Google Fonts with search and preview
-- **Text Styling**: Font weight, italic, underline, strikethrough options
-- **Positioning**: Top, center, or bottom placement with offset control
-- **Line Height**: Adjustable spacing for multi-line text
-
-### Multi-Language Support
-- **Multiple Languages**: Add translations for any language
-- **Language Flags**: Visual language switcher with flag icons
-- **AI Translation via WebMCP**: Ask your AI assistant (ChatGPT etc.) to translate via site tools — no API keys needed
-- **Per-Screenshot Languages**: Different text per screenshot if needed
-- **Localized Screenshots**: Upload language-specific screenshot images with auto-detection from filename
-- **Smart Duplicate Detection**: Dialog to replace, create new, or skip when uploading matching screenshots
-- **Multi-Language Export**: Export current language only or all languages in separate folders
-
-### Project Management
-- **Multiple Projects**: Create, rename, and delete projects
-- **Auto-Save**: All changes saved automatically to browser storage
-- **Screenshot Count**: See screenshot counts in project selector
-
-### User Interface
-- **Dark Theme**: Easy on the eyes for extended editing sessions
-- **Side Preview Carousel**: See adjacent screenshots while editing
-- **Drag & Drop**: Reorder screenshots by dragging
-- **Collapsible Sections**: Clean UI with expandable settings panels
-- **Tab Persistence**: Remembers your active tab between sessions
-
-## Getting Started
-
-### Just Want to Use It?
-
-Visit **[storedeck.byanr.com](https://storedeck.byanr.com)** to use the tool directly in your browser. No installation needed!
-
----
-
-### Want to Develop & Customize?
-
-#### Option 1: With Claude Desktop (Easiest - No Technical Knowledge Required)
-
-Perfect for non-technical users who want to run and modify the tool locally with AI assistance:
-
-1. **Install GitHub Desktop**
-   - Download from [desktop.github.com](https://desktop.github.com)
-   - Install and sign in with your GitHub account
-
-2. **Clone this repository**
-   - Click the green "Code" button above → "Open with GitHub Desktop"
-   - Choose where to save it (e.g., Documents folder)
-
-3. **Install Claude Desktop**
-   - Download from [claude.ai/download](https://claude.ai/download)
-   - Sign in with your Anthropic account
-
-4. **Open in Claude Desktop**
-   - Open Claude Desktop app
-   - Click the "Code" tab at the top
-   - Click "Open Folder" and select the cloned repository folder
-
-5. **Start the app**
-   - Simply type: **"start the app"**
-   - Claude will automatically start the server and tell you which URL to open in your browser
-   - Claude monitors the server and reports any issues
-
-6. **Make changes**
-   - Ask Claude to modify features, fix bugs, or add functionality
-   - Claude will show you the proposed commit message before committing
-   - All changes are automatically saved to Git
-
-No command line, no technical setup - just chat with Claude!
-
-#### Option 2: Run Locally (Command Line)
-
-Since this app uses IndexedDB for persistence, you need to serve it through a local web server:
+Requires Node 22+ and pnpm.
 
 ```bash
-# Using Python
-cd storedeck
-python3 -m http.server 8000
-
-# Using Node.js
-npx serve .
+pnpm install
+pnpm dev          # http://localhost:3000
+pnpm test         # unit + WebMCP tool tests
+pnpm typecheck
+pnpm build        # prerendered site + client editor in dist/client
+pnpm preview
 ```
 
-Then open `http://localhost:8000` in your browser.
+Architecture notes for contributors and coding agents live in [AGENTS.md](AGENTS.md).
 
-#### Option 3: VS Code Live Server
-
-If you have the "Live Server" extension installed in VS Code, right-click `index.html` and select "Open with Live Server".
-
-#### Option 4: Docker
-
-Run the pre-built Docker image from GitHub Container Registry:
+### Docker
 
 ```bash
-# Using Docker directly
-docker run -d -p 8080:80 ghcr.io/nikhil1920/storedeck:latest
-
-# Using Docker Compose
-docker compose up -d
+docker compose -f docker-compose.build.yml up -d   # build locally → http://localhost:8080
+docker compose up -d                               # prebuilt image
 ```
 
-Then open `http://localhost:8080` in your browser.
+The image builds the site and serves `dist/client` with nginx
+([`nginx.conf`](nginx.conf)); any static host works the same way.
 
-#### Building locally
+## Tech stack
 
-If you want to build the image yourself:
+React 19 · TanStack Start/Router · Vite · Tailwind CSS v4 · Zustand + Immer ·
+HTML Canvas · Three.js · IndexedDB (idb) · JSZip · WebMCP
 
-```bash
-docker compose -f docker-compose.build.yml up -d
-```
+## Apps using Storedeck
 
-## Usage
-
-1. **Upload Screenshots**: Drag and drop your app screenshots or click to browse
-2. **Choose Output Size**: Select the target device size from the sidebar
-3. **Customize Background**: Choose gradient, solid color, or image background
-4. **Position Screenshot**: Use presets or manually adjust scale, position, and rotation
-5. **Switch to 3D** (optional): Enable 3D mode for interactive iPhone mockup
-6. **Add Text**: Enter your headline and optional subheadline
-7. **Export**: Download the current screenshot or export all at once as ZIP
-
-## AI Translation (via WebMCP Site Tools)
-
-Translations are now powered by **WebMCP site tools** — no API keys needed.
-
-1. Add multiple languages via the language menu (flag icon)
-2. Enter your headline/subheadline in the source language
-3. Open this page in a **WebMCP-capable browser** (e.g., ChatGPT desktop app) and ask your AI assistant:
-   - _"Translate all screenshots from en to de, fr, ja"_
-   - _"Translate headline on screenshot 2 to German"_
-4. The assistant will call site tools (`list_screenshots`, `set_bulk_translations`, etc.) and apply translations directly — you’ll see the canvas update instantly.
-5. Alternatively, translate manually in the Translate modal for any browser.
-
-Learn more: [WebMCP spec](https://webmachinelearning.github.io/webmcp/) · [ChatGPT Site Tools docs](https://learn.chatgpt.com/docs/webmcp)
-
-## Autonomous Agent Workflow (App Store images end-to-end)
-
-The app exposes **14 WebMCP site tools** (`webmcp.js`) covering the full
-workflow: project management, screenshot upload, copy, design (background /
-device / text / output size), overlays (elements / popouts), and
-full-resolution PNG export. Tools are grouped by domain with an `action`
-parameter (e.g. `manage_screenshots` with upload|select|delete|duplicate|move)
-to keep agent context usage small.
-
-For visual QA, call `get_images` with `rendered: true` and an optional
-`screenshotIndex`. This returns the styled composition as a PNG preview,
-with its longest side capped at 900 pixels by default. Set `maxDimension`
-between 200 and 1200 to adjust preview detail; previews never upscale.
-The render waits for fonts and 3D models and preserves the selected screenshot
-and language. Use `export` for full-resolution store assets.
-
-Run focused WebMCP rendering checks with `npm test` and create the static bundle
-with `npm run build`.
-
-If you want a coding agent to create App Store images for your own app,
-copy the instructions from [`AGENTS_SNIPPET.md`](AGENTS_SNIPPET.md) into
-your project's `AGENTS.md`. The agent will then take simulator
-screenshots, open this website, upload them, add titles/subtitles, ask you
-for feedback, apply revisions, and export the finals for upload to
-App Store Connect.
-
-## Tech Stack
-
-- Vanilla JavaScript (no frameworks)
-- HTML5 Canvas for 2D rendering
-- Three.js for 3D device mockups
-- IndexedDB for local storage
-- JSZip for batch export
-- Google Fonts API for font picker
-- WebMCP site tools for AI translations (no external API keys)
-- Docker + nginx for containerized deployment
-
-## Apps Using This Project
-
-Built something with this tool? Add your app to the list by submitting a pull request!
+Built something with this tool? Add your app with a pull request!
 
 | App | Description | Link |
 |-----|-------------|------|
@@ -239,12 +100,12 @@ Built something with this tool? Add your app to the list by submitting a pull re
 
 ## License
 
-MIT License — see [LICENSE](LICENSE). Feel free to use, modify, and distribute.
+MIT — see [LICENSE](LICENSE).
 
 ## Credits
-- **Samsung Galaxy S25 Ultra 3D Model** by [mistJS](https://sketchfab.com/mistjs) - Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
-- **iPhone 15 Pro Max 3D Model** by [MajdyModels](https://sketchfab.com/majdymodels) - Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- **Samsung Galaxy S25 Ultra 3D Model** by [mistJS](https://sketchfab.com/mistjs) — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- **iPhone 15 Pro Max 3D Model** by [MajdyModels](https://sketchfab.com/majdymodels) — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
 ## Acknowledgements
 
