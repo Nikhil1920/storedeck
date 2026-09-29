@@ -71,7 +71,7 @@ The styled screenshots above were produced by an AI agent driven with
 
 > I have simulator screenshots of Veena a speech to text application that
 > supports 22 Indian languages at
-> '/Users/anr/projects/appscreen/veena-screenshots'. I want you to use
+> '~/veena-screenshots'. I want you to use
 > agent-browser open "https://storedeck.byanr.com" and use the webmcp tools
 > available to create Stylised App Store screenshots for this application They
 > should have a heading and a subheading with enough spacing in between and
@@ -82,11 +82,12 @@ The styled screenshots above were produced by an AI agent driven with
 
 ## How to reproduce
 
-1. Serve Storedeck locally (`python3 -m http.server 8000`) or open
-   [storedeck.byanr.com](https://storedeck.byanr.com).
-2. Upload the images in [`veena/before/`](veena/before/).
-3. Apply a minimal light background, centered device frame, heading +
-   subheading copy from the table above (English first, then duplicate for
-   Telugu via the language menu / WebMCP `set_text_content`).
-4. Visually verify spacing and export per language
-   (WebMCP `export` tool or Export → all languages as ZIP).
+1. Run Storedeck locally (`pnpm dev`) or open
+   [storedeck.byanr.com/editor](https://storedeck.byanr.com/editor).
+2. Upload the images in [`veena/before/`](veena/before/) to an iPhone platform.
+3. Apply a light gradient background, a centered phone frame and the heading +
+   subheading copy from the table above; add Telugu (`te`) in the language menu
+   and fill the second column in the **Strings** view (or with the WebMCP
+   `set_copy` tool).
+4. Check every screen × language in the **Board** view, then export all
+   languages as a ZIP (or with the WebMCP `export` tool).

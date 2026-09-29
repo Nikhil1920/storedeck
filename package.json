@@ -1,7 +1,9 @@
 {
   "name": "storedeck",
-  "version": "1.0.0",
-  "description": "Storedeck - Create beautiful App Store marketing screenshots",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Storedeck - design stylised store screenshots for the App Store, Google Play, desktop and TV stores, with A/B variants, localization and WebMCP agent control",
   "author": {
     "name": "Storedeck",
     "url": "https://storedeck.byanr.com"
@@ -13,7 +15,41 @@
     "url": "https://github.com/Nikhil1920/storedeck"
   },
   "scripts": {
-    "serve": "python3 -m http.server 8000",
-    "build": "./scripts/build-dist.sh"
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "cf:preview": "pnpm build && wrangler dev",
+    "cf:deploy": "pnpm build && wrangler deploy"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "^1.170.40",
+    "@tanstack/react-start": "^1.168.59",
+    "idb": "^8.0.3",
+    "immer": "^11.1.18",
+    "jszip": "^3.10.2",
+    "lucide": "^1.48.0",
+    "lucide-react": "^1.48.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "three": "^0.186.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "fake-indexeddb": "^6.0.0",
+    "jsdom": "^26.0.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.0",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2",
+    "wrangler": "4.143.1"
   }
 }
