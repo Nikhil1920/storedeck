@@ -1,0 +1,19 @@
+// Cloudflare Workers static-assets deployment (no Worker script): the
+// prerendered site and client-only editor in dist/client are uploaded as-is.
+// `pnpm run cf:deploy` creates/updates a Worker named "storedeck" on the
+// account you are logged in to. Override the target without editing this file:
+//   pnpm run cf:deploy --name <worker-name> --domain <your.domain>
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "storedeck",
+  "compatibility_date": "2026-09-26",
+  "assets": {
+    "directory": "./dist/client",
+    // Pages are prerendered as /guides/index.html and served at /guides (canonical, no trailing slash).
+    "html_handling": "drop-trailing-slash",
+    // Unknown paths get dist/client/404.html with a 404 status.
+    "not_found_handling": "404-page"
+  },
+  "workers_dev": true,
+  "preview_urls": false
+}

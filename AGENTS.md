@@ -36,9 +36,27 @@ pnpm build       # client + SSR build, prerender pages, sitemap/robots/llms file
 pnpm preview     # serve the production build
 pnpm test        # vitest (jsdom + fake-indexeddb)
 pnpm typecheck   # tsc --noEmit
+pnpm run cf:preview   # production build on the local Workers runtime
+pnpm run cf:deploy    # build + deploy to Cloudflare Workers
 ```
 
-Deploy `dist/client` to any static host (see `nginx.conf` / `Dockerfile`).
+## Deployment
+
+- The site deploys to **Cloudflare Workers static assets** (no Worker script):
+  `wrangler.jsonc` uploads `dist/client` with `drop-trailing-slash` URLs and a
+  `404.html` page; `public/_headers` sets security/cache headers.
+- `pnpm run cf:deploy` builds and deploys to a Worker named `storedeck` on the
+  logged-in account; pass `--name <worker> --domain <domain>` to target a
+  different Worker or custom domain. `pnpm exec wrangler deploy --dry-run`
+  validates without uploading. `pnpm deploy` is pnpm's built-in command, not
+  this script.
+- Never add account IDs, API tokens, dashboard URLs or other deployment
+  secrets to the repo — this is a public open-source project. Pass them via
+  CLI flags or environment variables (`CLOUDFLARE_ACCOUNT_ID`,
+  `CLOUDFLARE_API_TOKEN`).
+- Deploying the official site is a maintainer action: only do it when the
+  maintainer explicitly asks.
+- `Dockerfile` / `nginx.conf` / `docker-compose.yml` are for self-hosting.
 
 ## Document model (`src/lib/model`)
 

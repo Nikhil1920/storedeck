@@ -71,7 +71,7 @@ The styled screenshots above were produced by an AI agent driven with
 
 > I have simulator screenshots of Veena a speech to text application that
 > supports 22 Indian languages at
-> '/Users/anr/projects/appscreen/veena-screenshots'. I want you to use
+> '~/veena-screenshots'. I want you to use
 > agent-browser open "https://storedeck.byanr.com" and use the webmcp tools
 > available to create Stylised App Store screenshots for this application They
 > should have a heading and a subheading with enough spacing in between and

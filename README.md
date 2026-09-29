@@ -67,36 +67,40 @@ pnpm preview
 
 Architecture notes for contributors and coding agents live in [AGENTS.md](AGENTS.md).
 
-### Docker
+## Deployment
+
+Storedeck is a static site: the prerendered pages and the client-only editor in
+`dist/client` need no server code. The official site at
+[storedeck.byanr.com](https://storedeck.byanr.com) runs on **Cloudflare
+Workers static assets**, and you can deploy your own copy the same way:
 
 ```bash
-docker compose -f docker-compose.build.yml up -d   # build locally → http://localhost:8080
-docker compose up -d                               # prebuilt image
+pnpm exec wrangler login   # once, with your Cloudflare account
+pnpm run cf:preview        # build and serve locally on the Workers runtime
+pnpm run cf:deploy         # build and deploy a Worker named "storedeck"
+pnpm run cf:deploy --name my-storedeck --domain screenshots.example.com
+```
+
+[`wrangler.jsonc`](wrangler.jsonc) serves pages at clean URLs without trailing
+slashes and `404.html` for unknown paths; [`public/_headers`](public/_headers)
+sets security and cache headers. Use `pnpm run cf:deploy` — plain `pnpm deploy`
+is a different, built-in pnpm command.
+
+### Self-hosting with Docker
+
+```bash
+docker compose up -d --build   # http://localhost:8080
 ```
 
 The image builds the site and serves `dist/client` with nginx
-([`nginx.conf`](nginx.conf)); any static host works the same way.
+([`nginx.conf`](nginx.conf)). Any static host works the same way: serve
+`dist/client`, map `/path` to `/path/index.html`, and use `404.html` for
+unknown URLs.
 
 ## Tech stack
 
 React 19 · TanStack Start/Router · Vite · Tailwind CSS v4 · Zustand + Immer ·
-HTML Canvas · Three.js · IndexedDB (idb) · JSZip · WebMCP
-
-## Apps using Storedeck
-
-Built something with this tool? Add your app with a pull request!
-
-| App | Description | Link |
-|-----|-------------|------|
-| Cable | Manage your 12V systems like Boats and RVs | [cable.yuzuhub.com](https://cable.yuzuhub.com) |
-| Eno | Wine pairings and food pairings made easy | [eno.yuzuhub.com](https://eno.yuzuhub.com) |
-| TravelRates Currency Converter* | Exchange Rates for Travelers | [apple.com](https://apps.apple.com/sg/app/travelrates-currency-converter/id6756080378) |
-| Trakz Sales Tracker | Manage sales for restaurants and small businesses | [apple.com](https://apps.apple.com/us/app/trakz-sales-tracker/id6748954468) |
-| AI Soccer Insights Football IQ | AI-powered football predictions and insights | [apple.com](https://apps.apple.com/us/app/ai-soccer-insights-football-iq/id6592649804) |
-| Navegatime | time tracking for workers and business functions | [play.google.com](https://play.google.com/store/apps/details?id=com.companyname.NavegaTime) |
-| Sommo | Your personal wine journey — scan labels, learn wine, and build your tasting journal | [sommo.app](https://sommo.app) |
-| Dandelion: Write and Let Go | An ephemeral journal for writing to let go, not save. | [apple.com](https://apps.apple.com/us/app/dandelion-write-and-let-go/id6757363901) |
-| *Your app here* | *Submit a PR to add your app* | *Your app link* |
+HTML Canvas · Three.js · IndexedDB (idb) · JSZip · WebMCP · Cloudflare Workers
 
 ## License
 
@@ -106,7 +110,3 @@ MIT — see [LICENSE](LICENSE).
 
 - **Samsung Galaxy S25 Ultra 3D Model** by [mistJS](https://sketchfab.com/mistjs) — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 - **iPhone 15 Pro Max 3D Model** by [MajdyModels](https://sketchfab.com/majdymodels) — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
-
-## Acknowledgements
-
-Storedeck is a fork of [AppScreen](https://github.com/YUZU-Hub/appscreen) by [YUZU-Hub](https://yuzuhub.com) — thanks to the original authors for the great foundation.

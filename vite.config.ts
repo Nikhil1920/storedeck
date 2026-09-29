@@ -21,8 +21,8 @@ export default defineConfig({
         // Only crawl real pages: skip editor deep links (?platform=), anchors and generated text files.
         filter: ({ path }) => !path.includes('?') && !path.includes('#') && !/\.(txt|xml|json)$/.test(path),
       },
-      // Static hosts serve this for unknown URLs (see nginx.conf).
-      pages: [{ path: '/404' }],
+      // Static hosts serve this for unknown URLs (Cloudflare "404-page", nginx error_page).
+      pages: [{ path: '/404', prerender: { enabled: true, outputPath: '/404.html' } }],
     }),
     viteReact(),
   ],
