@@ -1,0 +1,8 @@
+# Editors write the line endings .gitattributes expects.
+root = true
+
+[*]
+end_of_line = lf
+
+[*.{bat,cmd}]
+end_of_line = crlf
